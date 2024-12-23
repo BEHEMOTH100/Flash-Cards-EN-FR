@@ -2,12 +2,11 @@
 from tkinter import *
 import pandas
 from random import choice
-BACKGROUND_COLOR = "#B1DDC6"
+BACKGROUND_COLOR = "#697565"
 original_lang = "French"
 translated_lang = "English"
 curr_card = {}
 to_learn = {}
-
 #------------------------ DATAFRAME ------------------------#
 try:
     data = pandas.read_csv("./words-data/not-yet-known-words.csv")
