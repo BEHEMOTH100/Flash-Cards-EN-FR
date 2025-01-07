@@ -2,7 +2,8 @@
 from tkinter import *
 import pandas
 from random import choice
-BACKGROUND_COLOR = "#697565"
+FLIP_TIMER_CONSTANT = 2500
+BACKGROUND_COLOR = "dimgrey"
 original_lang = "French"
 translated_lang = "English"
 curr_card = {}
@@ -11,7 +12,7 @@ to_learn = {}
 try:
     data = pandas.read_csv("./words-data/not-yet-known-words.csv")
 except FileNotFoundError:
-    original_data = pandas.read_csv("words-data/original-words.csv")
+    original_data = pandas.read_csv("words-data/original-words-718-corrected.csv")
     to_learn = original_data.to_dict(orient="records")
 else:
     to_learn = data.to_dict(orient="records")
@@ -25,7 +26,7 @@ def is_known():
 # ------------------------ RESET PROGRESS ------------------------#
 def reset_progress():
     try:
-        with open(file="./words-data/original-words.csv", mode="r") as origin_file:
+        with open(file="./words-data/original-words-718-corrected.csv", mode="r") as origin_file:
             origin_data = origin_file.read()
     except FileNotFoundError:
         print("File not found")
@@ -36,9 +37,9 @@ def reset_progress():
 #------------------------ NEXT CARD ------------------------#
 def next_card():
     global curr_card, flip_timer
-    reset_button.config(text=f"RESET {len(to_learn)} words left")
+    reset_button.config(text=f"RESET PROGRESS: {len(to_learn)} words left")
     window.after_cancel(flip_timer)
-    flip_timer = window.after(3500, flipping_card)
+    flip_timer = window.after(FLIP_TIMER_CONSTANT, flipping_card)
 
     curr_card = choice(to_learn)
     canvas.itemconfig(language_text,fill="black", text=f"{translated_lang}")
@@ -54,7 +55,7 @@ def flipping_card():
 def see_card_again():
     global curr_card, flip_timer
     window.after_cancel(flip_timer)
-    flip_timer = window.after(3500, flipping_card)
+    flip_timer = window.after(FLIP_TIMER_CONSTANT, flipping_card)
     #english side of card
     canvas.itemconfig(language_text, fill="black", text=f"{translated_lang}")
     canvas.itemconfig(word_text, fill="black", text=curr_card[f"{translated_lang}"])
@@ -67,10 +68,12 @@ def flip_language():
     if original_lang == "French":
         original_lang = "English"
         translated_lang = "French"
-        right_button_label.config(text="Je comprend ce mot")
+        right_button_label.config(text="Compris")
+        x_button_label.config(text="Pas compris")
         see_again_button.config(text="Voir encore")
     elif original_lang == "English":
-        right_button_label.config(text="I understand this word")
+        right_button_label.config(text="Know")
+        x_button_label.config(text="Don't know")
         see_again_button.config(text="See again")
     else:
         original_lang = "French"
@@ -87,7 +90,6 @@ right_button_img = PhotoImage(file="images/check.png")
 x_button_img = PhotoImage(file="images/cross.png")
 card_front_img = PhotoImage(file="images/card-front.png")
 card_back_img = PhotoImage(file="images/card-back.png")
-reset_img = PhotoImage(file="images/reset.png")
 #----------------- UI FLASH CARDS -----------------#
 #card
 canvas = Canvas(width=800, height=526)
@@ -102,24 +104,25 @@ right_button = Button(image=right_button_img, highlightthickness=0, command=is_k
 right_button.grid(row=2, column=3)
 
 x_button = Button(image=x_button_img, highlightthickness=0, command=next_card, background=BACKGROUND_COLOR)
-x_button.grid(row=2, column=2)
+x_button.grid(row=2, column=1)
 
-reset_button = Button( text=f"RESET", foreground="black", highlightthickness=0, command=reset_progress)
-reset_button.grid(row=0, column=2)
+reset_button = Button( text=f"RESET PROGRESS", foreground="black", background="tomato" ,highlightthickness=0, command=reset_progress)
+reset_button.grid(row=0, column=1)
 
 see_again_button = Button(text="See again", foreground="black", highlightthickness=0, command=see_card_again)
-see_again_button.grid(row=1, column=6)
+see_again_button.grid(row=1, column=7)
 
 flip_lang_button = Button(text="Flip", foreground="black", highlightthickness=0, command=flip_language)
 flip_lang_button.grid(row=0, column=3)
 
 #labels
-right_button_label = Label(text="I understand this one", font=("courier", 15, "normal"), background=BACKGROUND_COLOR, foreground="black")
+right_button_label = Label(text="Know", font=("courier", 15, "bold"), background=BACKGROUND_COLOR, foreground="black")
 right_button_label.grid(row=3, column=3)
 
+x_button_label = Label(text="Don't know", font=("courier", 15, "bold"), background=BACKGROUND_COLOR, foreground="black")
+x_button_label.grid(row=3, column=1)
 
-
-flip_timer = window.after(3500, flipping_card)
+flip_timer = window.after(FLIP_TIMER_CONSTANT, flipping_card)
 next_card()
 
 
